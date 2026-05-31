@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ATS Resume Analyzer</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<div id="loader" class="loader-overlay">
+    <div class="loader"></div>
+    <p>Analyzing Resume...</p>
+</div>
+
+<div class="container">
+
+<div class="hero">
+
+    <div class="top-bar">
+        <h1>🚀 ATS Resume Analyzer</h1>
+
+        <button class="theme-btn" onclick="toggleTheme()">
+            🌙
+        </button>
+    </div>
+
+    <p>
+        AI Powered Resume Review, ATS Score, Skill Gap Analysis & Optimization
+    </p>
+
+</div>
+
+<div class="card">
+
+    <form method="POST" enctype="multipart/form-data" id="resumeForm">
+
+        <div class="upload-box">
+
+            <label class="upload-label">
+
+                📄 Upload Resume (PDF)
+
+                <input
+                    type="file"
+                    name="resume"
+                    accept=".pdf"
+                    required
+                >
+
+            </label>
+
+        </div>
+
+        <div class="input-group">
+
+            <label>Job Description</label>
+
+            <textarea
+                name="job_description"
+                rows="10"
+                placeholder="Paste Job Description Here..."
+                required
+            ></textarea>
+
+        </div>
+
+        <div class="button-grid">
+
+            <button name="action" value="review">
+                Resume Review
+            </button>
+
+            <button name="action" value="ats">
+                ATS Score
+            </button>
+
+            <button name="action" value="gap">
+                Skill Gap
+            </button>
+
+            <button name="action" value="interview">
+                Interview Questions
+            </button>
+
+            <button name="action" value="optimize">
+                Optimize Resume
+            </button>
+            <button name="action" value="roadmap">
+                Learning Roadmap
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% if result %}
+
+    {% if is_json %}
+
+    <div class="dashboard">
+
+        <div class="score-circle" style="background: conic-gradient(#22c55e {{ result.ats_score }}%, #1e293b 0);">
+            {{ result.ats_score }}%
+        </div>
+
+            <div class="info-card">
+
+                <h3>🎯 Candidate Status</h3>
+
+                <p>{{ result.candidate_status }}</p>
+
+            </div>
+
+            <div class="info-card">
+
+                <h3>💡 Recommendation</h3>
+
+                <p>{{ result.recommendation }}</p>
+
+            </div>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>✅ Strengths</h3>
+
+            <div class="skills-container">
+
+                {% for item in result.strengths %}
+                <span class="skill-tag">
+                    {{ item }}
+                </span>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>⚠ Weaknesses</h3>
+
+            <div class="skills-container">
+
+                {% for item in result.weaknesses %}
+                <span class="warning-tag">
+                    {{ item }}
+                </span>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <div class="info-card">
+
+            <h3>❌ Missing Skills</h3>
+
+            <div class="skills-container">
+
+                {% for item in result.missing_skills %}
+                <span class="missing-tag">
+                    {{ item }}
+                </span>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="results-container">
+
+        <div class="result-header">
+
+            <h2>📊 Analysis Result</h2>
+
+            <a href="/download" class="download-btn">
+        📄 Download Report
+                </a>
+
+        </div>
+
+        <div class="result-card">
+
+            <div id="result-content">
+                {{ result | replace('\n','<br>') | safe }}
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+{% endif %}
+
+</div>
+
+<script>
+
+document.getElementById("resumeForm").addEventListener(
+    "submit",
+    function(){
+
+        document.getElementById(
+            "loader"
+        ).style.display="flex";
+    }
+);
+
+function copyResult(){
+
+    const text =
+    document.getElementById(
+        "result-content"
+    ).innerText;
+
+    navigator.clipboard.writeText(
+        text
+    );
+
+    alert("Copied Successfully!");
+}
+
+function toggleTheme(){
+
+    document.body.classList.toggle(
+        "light-mode"
+    );
+}
+
+</script>
+
+</body>
+</html>
