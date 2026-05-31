@@ -4,7 +4,8 @@ load_dotenv()
 import os
 import json
 import fitz
-import google.generativeai as genai
+# import google.generativeai as genai
+from groq import Groq
 import faiss
 import numpy as np
 
@@ -28,11 +29,19 @@ from reportlab.lib.styles import (
 )
 # ---------------- GEMINI CONFIG ---------------- #
 
-print(os.environ.get("GOOGLE_API_KEY"))
+
 key = os.getenv("GOOGLE_API_KEY")
+key = os.getenv("GROQ_API_KEY")
+
+print("Groq Key Found:", key is not None)
+
+if key:
+    print("Using key:", key[:10] + "...")
+else:
+    print("GROQ_API_KEY not found")
 print("Using key:", key[:10] + "...")
-genai.configure(
-    api_key=os.getenv("GOOGLE_API_KEY")
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
 )
 
 app = Flask(__name__)
@@ -242,26 +251,30 @@ def get_gemini_response(
     print("Chunks Created:", len(chunks))
     print("Retrieved Context:")
     print(relevant_context[:500])
-    model = genai.GenerativeModel(
-        "gemini-2.5-flash"
-    )
 
     final_prompt = f"""
-    {prompt}
+{prompt}
 
-    JOB DESCRIPTION:
-    {job_description}
+JOB DESCRIPTION:
+{job_description}
 
-    RELEVANT RESUME CONTENT:
-    {relevant_context}
-    """
-     
-    response = model.generate_content(
-        final_prompt
+RELEVANT RESUME CONTENT:
+{relevant_context}
+"""
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "user",
+                "content": final_prompt
+            }
+        ],
+        temperature=0.3,
+        max_tokens=2048
     )
 
-    return response.text
-
+    return response.choices[0].message.content
 
 def generate_pdf(content):
 
