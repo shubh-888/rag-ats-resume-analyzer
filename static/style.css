@@ -363,3 +363,237 @@ border-radius:20px;
 .download-btn:hover{
     opacity:.9;
 }
+/* ===========================
+   ATS DASHBOARD ENHANCEMENTS
+=========================== */
+
+.dashboard{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+.score-card{
+    grid-column:span 2;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+}
+
+.score-card h2{
+    margin-bottom:20px;
+}
+
+.score-circle{
+    width:220px;
+    height:220px;
+    margin:auto;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:2.5rem;
+    font-weight:700;
+    position:relative;
+}
+
+.score-circle::before{
+    content:"";
+    position:absolute;
+    width:170px;
+    height:170px;
+    background:#0f172a;
+    border-radius:50%;
+}
+
+.score-circle{
+    color:white;
+}
+
+.score-circle span{
+    position:relative;
+    z-index:2;
+}
+
+.progress-bar{
+    width:100%;
+    height:12px;
+    background:#1e293b;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:25px;
+}
+
+.progress-fill{
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #22c55e,
+        #06b6d4
+    );
+    border-radius:20px;
+}
+
+/* CARD STYLING */
+
+.info-card{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    padding:25px;
+    transition:.3s;
+}
+
+.info-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 15px 30px rgba(0,0,0,.25);
+}
+
+.info-card h3{
+    margin-bottom:15px;
+    font-size:1.1rem;
+}
+
+/* TAGS */
+
+.skills-container{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.skill-tag,
+.warning-tag,
+.missing-tag{
+    padding:10px 15px;
+    border-radius:999px;
+    font-size:.9rem;
+    font-weight:500;
+}
+
+.skill-tag{
+    background:#16a34a;
+    color:white;
+}
+
+.warning-tag{
+    background:#f59e0b;
+    color:black;
+}
+
+.missing-tag{
+    background:#dc2626;
+    color:white;
+}
+
+/* RESULT CARD */
+
+.result-card{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:25px;
+    line-height:1.8;
+    border:1px solid rgba(255,255,255,.08);
+}
+
+#result-content{
+    color:#e2e8f0;
+    white-space:pre-wrap;
+}
+
+/* BUTTONS */
+
+.download-btn{
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
+    color:white;
+    padding:12px 20px;
+    border-radius:12px;
+    text-decoration:none;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.download-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* LIGHT MODE */
+
+.light-mode .score-card,
+.light-mode .info-card,
+.light-mode .result-card{
+    background:white;
+    color:#0f172a;
+}
+
+.light-mode .score-circle::before{
+    background:white;
+}
+
+.light-mode #result-content{
+    color:#334155;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .score-card{
+        grid-column:span 1;
+    }
+
+    .score-circle{
+        width:180px;
+        height:180px;
+        font-size:2rem;
+    }
+
+    .score-circle::before{
+        width:140px;
+        height:140px;
+    }
+}
+.result-card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:30px;
+    line-height:2;
+    font-size:16px;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+.result-card h1,
+.result-card h2,
+.result-card h3{
+    color:#60a5fa;
+    margin-bottom:10px;
+}
+
+.result-card strong{
+    color:#22c55e;
+}
+
+.result-card ul{
+    padding-left:20px;
+}
+
+.result-card li{
+    margin-bottom:8px;
+}

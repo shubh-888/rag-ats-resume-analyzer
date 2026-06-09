@@ -327,25 +327,40 @@ Provide:
 Be detailed and professional.
 """
 
-ats_prompt = """
-Analyze the resume against the job description.
+"""
+You are an expert ATS Resume Scanner.
 
-Return ONLY valid JSON.
+Return the analysis in this format:
 
-{
-  "ats_score": 0,
-  "candidate_status": "",
-  "strengths": [],
-  "weaknesses": [],
-  "missing_skills": [],
-  "recommendation": ""
-}
+# 🎯 ATS Match Score
+Score: XX%
 
-Rules:
-- Return pure JSON only.
-- No markdown.
-- No ```json.
-- No explanation text.
+# ✅ Matching Skills
+- Skill 1
+- Skill 2
+
+# ❌ Missing Skills
+- Skill 1
+- Skill 2
+
+# 💪 Strengths
+- Point 1
+- Point 2
+
+# ⚠ Weaknesses
+- Point 1
+- Point 2
+
+# 📈 Interview Chances
+High / Medium / Low
+
+# 🚀 Improvement Suggestions
+- Suggestion 1
+- Suggestion 2
+
+# 📝 Final Recommendation
+Detailed recommendation.
+
 """
 skill_gap_prompt = """
 Analyze the resume against the job description.
@@ -406,10 +421,33 @@ Provide:
 Make roadmap practical.
 """
 
+ats_prompt = """
+Return ONLY valid JSON.
+
+{
+  "ats_score": 0,
+  "candidate_status": "",
+  "matching_skills": [],
+  "missing_skills": [],
+  "strengths": [],
+  "weaknesses": [],
+  "recommendation": "",
+  "interview_probability": "",
+  "improvement_priority": "",
+  "resume_summary": ""
+}
+
+Analyze the resume against the job description.
+Do not return markdown.
+Do not return explanations.
+Return JSON only.
+"""
+
 # ---------------- ROUTE ---------------- #
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    print("HOME ROUTE HIT")
 
     result = ""
 
@@ -438,6 +476,31 @@ def home():
         resume_text = extract_pdf_text(
             resume_file
         )
+        # Resume Validation
+        def is_resume(text):
+            keywords = [
+                "education",
+                "skills",
+                "experience",
+                "projects",
+                "certifications"
+            ]
+
+            text = text.lower()
+
+            count = 0
+
+            for keyword in keywords:
+                if keyword in text:
+                    count += 1
+
+            return count >= 2
+
+        if not is_resume(resume_text):
+            return render_template(
+                "index.html",
+                result="❌ Uploaded PDF does not appear to be a resume. Please upload a valid resume."
+            )
 
         if action == "review":
             result = get_gemini_response(
@@ -445,33 +508,110 @@ def home():
                 resume_text,
                 review_prompt
             )
-            generate_pdf(str(result))
+            generate_pdf(result)
 
         elif action == "ats":
+
+            ats_prompt = """
+Return ONLY valid JSON.
+
+{
+    "ats_score": 0,
+    "candidate_status": "",
+    "matching_skills": [],
+    "missing_skills": [],
+    "strengths": [],
+    "weaknesses": [],
+    "recommendation": "",
+    "interview_probability": "",
+    "improvement_priority": "",
+    "resume_summary": ""
+}
+
+Analyze the resume against the job description.
+
+Rules:
+- Return JSON only.
+- Do not use markdown.
+- Do not use ```json.
+- ats_score must be between 0 and 100.
+"""
+
             response = get_gemini_response(
                 job_description,
                 resume_text,
                 ats_prompt
             )
-            generate_pdf(response)
 
-            print("RAW GEMINI RESPONSE:")
-            print(response)
-
-            response = response.strip()
-            response = response.replace("```json", "")
-            response = response.replace("```", "")
             try:
+                response = response.strip()
+
+                # Remove accidental markdown
+                response = response.replace("```json", "")
+                response = response.replace("```", "")
+
                 result = json.loads(response)
-            except Exception:
+
+            except Exception as e:
+                print("JSON ERROR:", e)
+                print("RAW RESPONSE:", response)
+
                 result = {
                     "ats_score": 0,
                     "candidate_status": "Parsing Error",
+                    "matching_skills": [],
+                    "missing_skills": [],
                     "strengths": [],
                     "weaknesses": [],
-                    "missing_skills": [],
-                    "recommendation": response
+                    "recommendation": response,
+                    "interview_probability": "Unknown",
+                    "improvement_priority": "Unknown",
+                    "resume_summary": ""
                 }
+
+            generate_pdf(str(result))
+            # response = get_gemini_response(
+            #     job_description,
+            #     resume_text,
+            #     ats_prompt
+            # )
+            # generate_pdf(response)
+
+            # response = response.strip()
+
+            # if "{" in response:
+            #     response = response[
+            #         response.find("{"):
+            #         response.rfind("}") + 1
+            #     ]
+
+            # try:
+            #     result = json.loads(response)
+
+            #     result.setdefault("ats_score", 0)
+            #     result.setdefault("candidate_status", "N/A")
+            #     result.setdefault("strengths", [])
+            #     result.setdefault("weaknesses", [])
+            #     result.setdefault("missing_skills", [])
+            #     result.setdefault("matching_skills", [])
+            #     result.setdefault("recommendation", "")
+            #     result.setdefault("interview_probability", "")
+            #     result.setdefault("improvement_priority", "")
+
+            # except Exception as e:
+            #     print("JSON ERROR:", e)
+
+            #     result = {
+            #         "ats_score": 0,
+            #         "candidate_status": "Parsing Error",
+            #         "strengths": [],
+            #         "weaknesses": [],
+            #         "missing_skills": [],
+            #         "matching_skills": [],
+            #         "recommendation": response,
+            #         "interview_probability": "Unknown",
+            #         "improvement_priority": "Unknown"
+            #     }
 
         elif action == "gap":
             result = get_gemini_response(
@@ -488,19 +628,22 @@ def home():
                 interview_prompt
             )
             generate_pdf(str(result))
-            
+
         elif action == "optimize":
             result = get_gemini_response(
                 job_description,
                 resume_text,
                 resume_optimizer_prompt
             )
+
         elif action == "roadmap":
             result = get_gemini_response(
                 job_description,
                 resume_text,
                 roadmap_prompt
             )
+            print("RESULT TYPE:", type(result))
+            print("RESULT:", result)
 
     return render_template(
         "index.html",
@@ -524,5 +667,14 @@ def download():
 import os
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True,
+        use_reloader=False
+    )
+    print("RAW GEMINI RESPONSE:")
+    print(type(result))
+    print(result)

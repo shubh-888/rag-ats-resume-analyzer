@@ -42,7 +42,7 @@
 
 <div class="card">
 
-    <form method="POST" enctype="multipart/form-data" id="resumeForm">
+<form method="POST" action="/" enctype="multipart/form-data" id="resumeForm">
 
         <div class="upload-box">
 
@@ -111,101 +111,151 @@
 
     <div class="dashboard">
 
-        <div class="score-circle" style="background: conic-gradient(#22c55e {{ result.ats_score }}%, #1e293b 0);">
-            {{ result.ats_score }}%
-        </div>
+<div class="score-card">
 
-            <div class="info-card">
+    <h2>🎯 ATS Match Score</h2>
 
-                <h3>🎯 Candidate Status</h3>
+    {% set score = result.get('ats_score', 0) %}
 
-                <p>{{ result.candidate_status }}</p>
+    <div class="score-circle"
+         style="background: conic-gradient(
+             #22c55e 0% {{ score }}%,
+             #1e293b {{ score }}% 100%
+         );">
 
-            </div>
-
-            <div class="info-card">
-
-                <h3>💡 Recommendation</h3>
-
-                <p>{{ result.recommendation }}</p>
-
-            </div>
-
-        </div>
-
-        <div class="info-card">
-
-            <h3>✅ Strengths</h3>
-
-            <div class="skills-container">
-
-                {% for item in result.strengths %}
-                <span class="skill-tag">
-                    {{ item }}
-                </span>
-                {% endfor %}
-
-            </div>
-
-        </div>
-
-        <div class="info-card">
-
-            <h3>⚠ Weaknesses</h3>
-
-            <div class="skills-container">
-
-                {% for item in result.weaknesses %}
-                <span class="warning-tag">
-                    {{ item }}
-                </span>
-                {% endfor %}
-
-            </div>
-
-        </div>
-
-        <div class="info-card">
-
-            <h3>❌ Missing Skills</h3>
-
-            <div class="skills-container">
-
-                {% for item in result.missing_skills %}
-                <span class="missing-tag">
-                    {{ item }}
-                </span>
-                {% endfor %}
-
-            </div>
-
-        </div>
+        <span>{{ score }}%</span>
 
     </div>
+
+</div>
+
+    <div class="progress-bar">
+        <div class="progress-fill"
+             style="width:{{ result.get('ats_score',0) }}%">
+        </div>
+    </div>
+
+</div>
+
+<div class="info-card">
+    <h3>🎯 Candidate Status</h3>
+    <p>{{ result.get('candidate_status','N/A') }}</p>
+</div>
+
+<div class="info-card">
+    <h3>💡 Recommendation</h3>
+    <p>{{ result.get('recommendation','N/A') }}</p>
+</div>
+
+<div class="info-card">
+    <h3>📈 Interview Probability</h3>
+    <p>{{ result.get('interview_probability','N/A') }}</p>
+</div>
+
+<div class="info-card">
+    <h3>🚀 Improvement Priority</h3>
+    <p>{{ result.get('improvement_priority','N/A') }}</p>
+</div>
+
+<div class="info-card">
+
+    <h3>✅ Matching Skills</h3>
+
+    <div class="skills-container">
+
+        {% for item in result.get('matching_skills',[]) %}
+        <span class="skill-tag">
+            {{ item }}
+        </span>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<div class="info-card">
+
+    <h3>💪 Strengths</h3>
+
+    <div class="skills-container">
+
+        {% for item in result.get('strengths',[]) %}
+        <span class="skill-tag">
+            {{ item }}
+        </span>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<div class="info-card">
+
+    <h3>⚠ Weaknesses</h3>
+
+    <div class="skills-container">
+
+        {% for item in result.get('weaknesses',[]) %}
+        <span class="warning-tag">
+            {{ item }}
+        </span>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<div class="info-card">
+
+    <h3>❌ Missing Skills</h3>
+
+    <div class="skills-container">
+
+        {% for item in result.get('missing_skills',[]) %}
+        <span class="missing-tag">
+            {{ item }}
+        </span>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+</div>
+
 
     {% else %}
 
-    <div class="results-container">
+   <div class="results-container">
 
-        <div class="result-header">
+    <div class="result-header">
 
-            <h2>📊 Analysis Result</h2>
+        <h2>📊 Analysis Result</h2>
+
+        <div>
+
+            <button onclick="copyResult()" class="download-btn">
+                📋 Copy
+            </button>
 
             <a href="/download" class="download-btn">
-        📄 Download Report
-                </a>
-
-        </div>
-
-        <div class="result-card">
-
-            <div id="result-content">
-                {{ result | replace('\n','<br>') | safe }}
-            </div>
+                📄 Download Report
+            </a>
 
         </div>
 
     </div>
+
+    <div class="result-card">
+
+        <div id="result-content">
+            {{ result | replace('\n','<br>') | safe }}
+        </div>
+
+    </div>
+
+</div>
 
     {% endif %}
 
